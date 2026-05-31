@@ -22,8 +22,7 @@ engine = create_engine(connection_string)
 CSV_DIR = r"C:\Official_HC_Projects\synthea-tool\output\csv"
 
 # Tables list
-tables = ['patients', 'encounters']
-
+tables = ['patients', 'encounters', 'conditions', 'medications', 'procedures']
 # Loop through the tables and load each into the database
 for table in tables:
     print(f"loading {table}...")

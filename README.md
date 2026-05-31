@@ -27,8 +27,8 @@ Synthea spits out CSVs of synthetic patients. From there:
 
 ## Where I'm at
 
-Just getting started. Repo's set up, next is generating the data and getting 
-Postgres running. I'll update this as pieces come together.
+Halfway through. The following is finished: Repo setup, Synthea data generated, Postgres running, and ingestion.
+Still have to expand the ingestion to all 5 tables required for my question, transform raw data in dbt, setup airflow orchestration, and add the Claude API layer.
 
 ## Stack
 

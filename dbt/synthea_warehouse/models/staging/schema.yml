@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: stg_patients
+    columns:
+      - name: patient_id
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_encounters
+    columns:
+      - name: encounter_id
+        tests:
+          - not_null
+          - unique
+      - name: patient_id
+        tests:
+          - not_null
+      - name: encounter_class
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['ambulatory', 'emergency', 'inpatient', 'wellness', 'urgentcare', 'outpatient', 'home', 'snf','hospice', 'virtual']
+
+  - name: stg_conditions
+    columns:
+      - name: patient_id
+        tests:
+          - not_null
+      - name: encounter_id
+        tests:
+          - not_null
+
+  - name: stg_medications
+    columns:
+      - name: patient_id
+        tests:
+          - not_null
+
+  - name: stg_procedures
+    columns:
+      - name: patient_id
+        tests:
+          - not_null

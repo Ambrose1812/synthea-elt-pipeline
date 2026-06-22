@@ -2,8 +2,33 @@ version: 2
 
 models:
   - name: patient_encounter_summary
+    description: >
+      One row per patient. Shows the highest number of combined emergency or inpatient
+      encounters that patient ever had within any 12 month window. Built with a self
+      join: for each qualifying encounter, count how many other qualifying encounters
+      for that same patient fall in the 365 days before it, then keep the highest count
+      across all of that patient's encounters.
     columns:
       - name: patient_id
+        description: Links back to stg_patients.
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('stg_patients')
+              field: patient_id
+      - name: max_encounters_in_any_12mo_window
+        description: The most combined emergency or inpatient encounters this patient had in any single rolling 12 month stretch.
+
+  - name: high_utilizers
+    description: >
+      Patients with 3 or more combined emergency or inpatient encounters in any rolling
+      12 month window, joined to their demographics. Worth noting: this threshold
+      doesn't distinguish a patient in genuine crisis from someone on a predictable
+      weekly recurring treatment (the data has both, and both can hit the same number).
+    columns:
+      - name: patient_id
+        description: Links back to stg_patients.
         tests:
           - not_null
           - unique
@@ -11,12 +36,14 @@ models:
               to: ref('stg_patients')
               field: patient_id
 
-  - name: high_utilizers
+  - name: condition_prevalence_comparison
+    description: >
+      Compares how common each condition is in high utilizers versus everyone else,
+      by percentage of patients affected. This is what actually answers the project's
+      clinical question: which conditions show up disproportionately in the
+      high-utilizer group.
     columns:
-      - name: patient_id
-        tests:
-          - not_null
-          - unique
-          - relationships:
-              to: ref('stg_patients')
-              field: patient_id
+      - name: condition_description
+        description: The condition being compared.
+      - name: percentage_point_difference
+        description: High utilizer percentage minus everyone else's percentage for this condition. Sorted highest first, so the top rows are the conditions most tied to high utilization.

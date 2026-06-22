@@ -2,10 +2,16 @@ version: 2
 
 sources:
   - name: raw
+    description: Raw Synthea patient data, loaded by the Python ingestion script. dbt never writes to this schema.
     schema: raw
     tables:
       - name: patients
+        description: One row per synthetic patient. Demographics, location, income, and healthcare cost/coverage.
       - name: encounters
+        description: One row per healthcare visit. Includes the encounter type (emergency, inpatient, etc), dates, and cost.
       - name: conditions
+        description: One row per diagnosed condition per patient. A patient can have the same condition logged more than once.
       - name: medications
+        description: One row per prescription, with dispense counts and cost.
       - name: procedures
+        description: One row per procedure performed, with cost and the linked reason code.

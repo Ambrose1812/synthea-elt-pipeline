@@ -2,44 +2,57 @@ version: 2
 
 models:
   - name: stg_patients
+    description: Cleaned patient demographics, one row per patient. Drops identity-heavy raw columns (SSN, license, passport) since they're not useful for the utilization analysis.
     columns:
       - name: patient_id
+        description: Unique ID for a patient.
         tests:
           - not_null
           - unique
 
   - name: stg_encounters
+    description: Cleaned encounter records, one row per visit. Dates are cast to timestamp so the rolling window logic downstream actually works.
     columns:
       - name: encounter_id
+        description: Unique ID for one encounter.
         tests:
           - not_null
           - unique
       - name: patient_id
+        description: Links back to stg_patients.
         tests:
           - not_null
       - name: encounter_class
+        description: What kind of visit this was (emergency, inpatient, ambulatory, etc). This is the column the whole high utilization definition is built on.
         tests:
           - not_null
           - accepted_values:
-              values: ['ambulatory', 'emergency', 'inpatient', 'wellness', 'urgentcare', 'outpatient', 'home', 'snf','hospice', 'virtual']
+              values: ['ambulatory', 'emergency', 'inpatient', 'wellness', 'urgentcare', 'outpatient', 'home', 'snf', 'hospice', 'virtual']
 
   - name: stg_conditions
+    description: Cleaned condition records, one row per diagnosis per patient.
     columns:
       - name: patient_id
+        description: Links back to stg_patients.
         tests:
           - not_null
       - name: encounter_id
+        description: Links back to stg_encounters, the visit where this condition was diagnosed.
         tests:
           - not_null
 
   - name: stg_medications
+    description: Cleaned medication records, one row per prescription/dispense event.
     columns:
       - name: patient_id
+        description: Links back to stg_patients.
         tests:
           - not_null
 
   - name: stg_procedures
+    description: Cleaned procedure records, one row per procedure performed.
     columns:
       - name: patient_id
+        description: Links back to stg_patients.
         tests:
           - not_null

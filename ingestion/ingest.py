@@ -1,7 +1,7 @@
 # Import packages
 import os
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
 # Load secrets
@@ -19,13 +19,17 @@ connection_string = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{D
 engine = create_engine(connection_string)
 
 # Synthea CSVs path
-CSV_DIR = r"C:\Official_HC_Projects\synthea-tool\output\csv"
+CSV_DIR = "/mnt/c/Official_HC_Projects/synthea-tool/output/csv"
 
 # Tables list
 tables = ['patients', 'encounters', 'conditions', 'medications', 'procedures']
+
 # Loop through the tables and load each into the database
 for table in tables:
     print(f"loading {table}...")
-    df = pd.read_csv(f"{CSV_DIR}\\{table}.csv")
+    df = pd.read_csv(f"{CSV_DIR}/{table}.csv")
+    with engine.connect() as conn:
+        conn.execute(text(f"DROP TABLE IF EXISTS raw.{table} CASCADE"))
+        conn.commit()
     df.to_sql(table, con=engine, schema="raw", if_exists="replace", chunksize=10000)
-    print(f"  done — {len(df)} rows")
+    print(f"  done - {len(df)} rows")

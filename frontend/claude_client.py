@@ -68,7 +68,11 @@ def generate_sql(question: str) -> str:
             "where condition_description matches diabetes - NOT filtered "
             "through analytics.high_utilizers. The two groups may overlap, "
             "but neither should be defined as a subset of the other unless "
-            "the question explicitly asks for that overlap."
+            "the question explicitly asks for that overlap.\n\n"
+            "When using ROUND() on the result of AVG() or any floating-point "
+            "aggregate, cast to numeric first, e.g. ROUND(AVG(col)::numeric, 2). "
+            "PostgreSQL's ROUND() has no overload for double precision with a "
+            "decimal places argument, only for numeric."
         ),
         messages=[{"role": "user", "content": question}],
     )

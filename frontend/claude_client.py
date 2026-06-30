@@ -36,9 +36,11 @@ SCHEMA_CONTEXT = (
     "  - flags patients with high emergency/inpatient utilization\n"
     "  - healthcare_coverage (numeric)\n\n"
     "analytics.condition_prevalence_comparison\n"
-    "  - compares condition prevalence between high utilizers and the general\n"
-    "    patient population\n"
-    "  - condition_description, high_utilizer_pct, general_population_pct\n\n"
+    "  - compares condition prevalence between high utilizers and\n"
+    "    non-high-utilizers\n"
+    "  - condition_description, high_utilizer_patient_count, high_utilizer_pct,\n"
+    "    non_high_utilizer_patient_count, non_high_utilizer_pct,\n"
+    "    percentage_point_difference\n\n"
     "Only query these tables. Never reference tables outside the `analytics` "
     "schema. Always write standard PostgreSQL syntax."
 )
@@ -90,7 +92,7 @@ def explain_results(question: str, sql: str, result_summary: str) -> str:
         system=(
             "You explain database query results to healthcare analysts "
             "in plain English. Be concise - 2-4 sentences. Don't repeat "
-            "the raw numbers verbatim, interpret what they mean." 
+            "the raw numbers verbatim, interpret what they mean."
         ),
         messages=[{
             "role": "user",
@@ -98,6 +100,35 @@ def explain_results(question: str, sql: str, result_summary: str) -> str:
                 f"Question asked: {question}\n\n"
                 f"SQL that was run: {sql}\n\n"
                 f"Result:\n{result_summary}"
+            ),
+        }],
+    )
+    return response.content[0].text.strip()
+
+
+def generate_insight_report(top_conditions_summary: str, coverage_summary: str) -> str:
+    """
+    Synthesizes precomputed query results into a narrative report.
+    Does not query the database directly; that's handled by the caller,
+    keeping this module focused on language generation only.
+    """
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=600,
+        system=(
+            "You are a healthcare data analyst writing a short narrative "
+            "report for a non-technical audience (hospital administrators). "
+            "Be concrete, reference specific numbers, and highlight the most "
+            "actionable findings. Write 3-5 short paragraphs in plain prose, "
+            "no markdown headers, no bullet points."
+        ),
+        messages=[{
+            "role": "user",
+            "content": (
+                "Write a narrative insight report based on this data.\n\n"
+                f"Conditions most overrepresented in high utilizers compared "
+                f"to non-high-utilizers:\n{top_conditions_summary}\n\n"
+                f"High utilizer cohort summary:\n{coverage_summary}"
             ),
         }],
     )
